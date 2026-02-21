@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1200, height=675">
+<title>EXP-SCALE-EMERGENCE-01 — Phase Transition</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  width: 1200px;
+  height: 675px;
+  background: #08080e;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+  color: #e0e0e8;
+  position: relative;
+}
+
+canvas#bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+}
+
+.overlay {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 32px 16px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.title-block h1 {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #00ffaa;
+  text-transform: uppercase;
+}
+
+.title-block .subtitle {
+  font-size: 12px;
+  font-weight: 300;
+  color: #7a7a9a;
+  margin-top: 2px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.hypothesis {
+  text-align: right;
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #5a5a7a;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+.hypothesis .h0 { color: #ff6b6b; }
+.hypothesis .prediction { color: #4ecdc4; }
+
+.charts {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+  min-height: 0;
+}
+
+.chart-panel {
+  background: rgba(15, 15, 25, 0.85);
+  border: 1px solid rgba(100, 100, 140, 0.15);
+  border-radius: 8px;
+  padding: 12px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.chart-panel.tail::before { background: linear-gradient(90deg, transparent, #ff6b6b, transparent); }
+.chart-panel.rebirth::before { background: linear-gradient(90deg, transparent, #ffd93d, transparent); }
+.chart-panel.align::before { background: linear-gradient(90deg, transparent, #4ecdc4, transparent); }
+.chart-panel.eff::before { background: linear-gradient(90deg, transparent, #a78bfa, transparent); }
+
+.chart-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.tail .chart-title { color: #ff6b6b; }
+.rebirth .chart-title { color: #ffd93d; }
+.align .chart-title { color: #4ecdc4; }
+.eff .chart-title { color: #a78bfa; }
+
+.chart-desc {
+  font-size: 9px;
+  color: #5a5a7a;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 6px;
+}
+
+.chart-area {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.chart-area canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(100, 100, 140, 0.1);
+}
+
+.footer-left {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #5a5a7a;
+}
+
+.verdict {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+.verdict.convergence {
+  color: #00ffaa;
+  border: 1px solid rgba(0, 255, 170, 0.3);
+  background: rgba(0, 255, 170, 0.05);
+}
+
+.footer-right {
+  font-size: 9px;
+  color: #3a3a5a;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.ko-quote {
+  font-size: 11px;
+  color: #4a4a6a;
+  text-align: center;
+  margin-top: 4px;
+  font-style: italic;
+}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="overlay">
+  <div class="header">
+    <div class="title-block">
+      <h1>EXP-SCALE-EMERGENCE-01</h1>
+      <div class="subtitle">Scaling internal resonance produces a phase transition</div>
+    </div>
+    <div class="hypothesis">
+      <div class="h0">H0: All metrics change smoothly, linearly, independently</div>
+      <div class="prediction">Test: simultaneous inflection = emergent behavior</div>
+    </div>
+  </div>
+
+  <div class="charts">
+    <div class="chart-panel tail">
+      <div class="chart-title">Tail Loss Probability</div>
+      <div class="chart-desc">catastrophic loss ratio (threshold: delta &lt; -25)</div>
+      <div class="chart-area"><canvas id="c1"></canvas></div>
+    </div>
+    <div class="chart-panel rebirth">
+      <div class="chart-title">Rebirth Variance</div>
+      <div class="chart-desc">survival time variance of re-emerged resonances</div>
+      <div class="chart-area"><canvas id="c2"></canvas></div>
+    </div>
+    <div class="chart-panel align">
+      <div class="chart-title">Alignment Accuracy</div>
+      <div class="chart-desc">internal consensus agreement quality</div>
+      <div class="chart-area"><canvas id="c3"></canvas></div>
+    </div>
+    <div class="chart-panel eff">
+      <div class="chart-title">Energy Efficiency</div>
+      <div class="chart-desc">action-to-energy ratio (higher = more efficient)</div>
+      <div class="chart-area"><canvas id="c4"></canvas></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-left">
+      Vanilla Mode: Consensus + RSP + CE only | 5 seeds per scale | scales: 200→2000 ticks
+    </div>
+    <div class="verdict convergence" id="verdict">CONVERGENCE DETECTED</div>
+    <div class="footer-right">SOAR v3 — 2026.02.21</div>
+  </div>
+  <div class="ko-quote">"규칙은 튜닝할 수 있다. 구조만 살아남는다."</div>
+</div>
+
+<script>
+const DATA = [
+  { scale: 200,  rsp: 182,   tail: 0.0930, tail_std: 0.0057, rb_var: 110.11,  align: 0.7073, align_std: 0.0182, eff: 380.0,  eff_std: 71.33 },
+  { scale: 500,  rsp: 459,   tail: 0.0952, tail_std: 0.0086, rb_var: 376.35,  align: 0.6965, align_std: 0.0109, eff: 463.2,  eff_std: 31.70 },
+  { scale: 1000, rsp: 925,   tail: 0.0906, tail_std: 0.0091, rb_var: 551.46,  align: 0.6886, align_std: 0.0067, eff: 501.6,  eff_std: 24.07 },
+  { scale: 1500, rsp: 1379,  tail: 0.0911, tail_std: 0.0085, rb_var: 334.66,  align: 0.6843, align_std: 0.0044, eff: 496.1,  eff_std: 17.55 },
+  { scale: 2000, rsp: 1848,  tail: 0.0936, tail_std: 0.0038, rb_var: 1027.95, align: 0.6838, align_std: 0.0035, eff: 510.2,  eff_std: 10.55 },
+];
+
+const bgCanvas = document.getElementById('bg');
+const bgCtx = bgCanvas.getContext('2d');
+bgCanvas.width = 1200;
+bgCanvas.height = 675;
+
+const particles = [];
+for (let i = 0; i < 80; i++) {
+  particles.push({
+    x: Math.random() * 1200,
+    y: Math.random() * 675,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: (Math.random() - 0.5) * 0.2,
+    r: Math.random() * 1.5 + 0.3,
+    alpha: Math.random() * 0.3 + 0.05,
+    color: ['#ff6b6b', '#ffd93d', '#4ecdc4', '#a78bfa', '#00ffaa'][Math.floor(Math.random() * 5)]
+  });
+}
+
+function animBg() {
+  bgCtx.fillStyle = 'rgba(8, 8, 14, 0.15)';
+  bgCtx.fillRect(0, 0, 1200, 675);
+  particles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.x < 0) p.x = 1200;
+    if (p.x > 1200) p.x = 0;
+    if (p.y < 0) p.y = 675;
+    if (p.y > 675) p.y = 0;
+    bgCtx.beginPath();
+    bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    bgCtx.fillStyle = p.color;
+    bgCtx.globalAlpha = p.alpha;
+    bgCtx.fill();
+    bgCtx.globalAlpha = 1;
+  });
+
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d < 80) {
+        bgCtx.beginPath();
+        bgCtx.moveTo(particles[i].x, particles[i].y);
+        bgCtx.lineTo(particles[j].x, particles[j].y);
+        bgCtx.strokeStyle = particles[i].color;
+        bgCtx.globalAlpha = (1 - d / 80) * 0.06;
+        bgCtx.lineWidth = 0.5;
+        bgCtx.stroke();
+        bgCtx.globalAlpha = 1;
+      }
+    }
+  }
+  requestAnimationFrame(animBg);
+}
+animBg();
+
+function drawChart(canvasId, values, errors, color, colorAlpha, yLabel) {
+  const canvas = document.getElementById(canvasId);
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * 2;
+  canvas.height = rect.height * 2;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(2, 2);
+  const w = rect.width;
+  const h = rect.height;
+
+  const pad = { l: 45, r: 15, t: 8, b: 22 };
+  const cw = w - pad.l - pad.r;
+  const ch = h - pad.t - pad.b;
+
+  const yMin = Math.min(...values.map((v, i) => v - (errors[i] || 0))) * 0.92;
+  const yMax = Math.max(...values.map((v, i) => v + (errors[i] || 0))) * 1.08;
+
+  function xPos(i) { return pad.l + (i / (values.length - 1)) * cw; }
+  function yPos(v) { return pad.t + ch - ((v - yMin) / (yMax - yMin)) * ch; }
+
+  ctx.strokeStyle = 'rgba(100,100,140,0.1)';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i < 4; i++) {
+    const yy = pad.t + (ch / 3) * i;
+    ctx.beginPath();
+    ctx.moveTo(pad.l, yy);
+    ctx.lineTo(pad.l + cw, yy);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = '#3a3a5a';
+  ctx.font = '8px JetBrains Mono';
+  ctx.textAlign = 'center';
+  DATA.forEach((d, i) => {
+    ctx.fillText(d.scale, xPos(i), h - 4);
+  });
+
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 3; i++) {
+    const v = yMin + (yMax - yMin) * (1 - i / 3);
+    ctx.fillText(v < 1 ? v.toFixed(3) : v.toFixed(0), pad.l - 4, pad.t + (ch / 3) * i + 3);
+  }
+
+  if (errors.some(e => e > 0)) {
+    ctx.fillStyle = colorAlpha;
+    ctx.beginPath();
+    values.forEach((v, i) => {
+      const x = xPos(i);
+      const yUp = yPos(v + errors[i]);
+      if (i === 0) ctx.moveTo(x, yUp);
+      else ctx.lineTo(x, yUp);
+    });
+    for (let i = values.length - 1; i >= 0; i--) {
+      ctx.lineTo(xPos(i), yPos(values[i] - errors[i]));
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 6;
+  ctx.beginPath();
+  values.forEach((v, i) => {
+    const x = xPos(i);
+    const y = yPos(v);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  values.forEach((v, i) => {
+    const x = xPos(i);
+    const y = yPos(v);
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+  });
+
+  let maxDelta = 0;
+  let maxIdx = 0;
+  for (let i = 0; i < values.length - 1; i++) {
+    const d = Math.abs(values[i + 1] - values[i]) / (yMax - yMin);
+    if (d > maxDelta) { maxDelta = d; maxIdx = i; }
+  }
+
+  if (maxDelta > 0.08) {
+    const mx = (xPos(maxIdx) + xPos(maxIdx + 1)) / 2;
+    const my = (yPos(values[maxIdx]) + yPos(values[maxIdx + 1])) / 2;
+    ctx.save();
+    ctx.globalAlpha = 0.4;
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(mx, pad.t);
+    ctx.lineTo(mx, pad.t + ch);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+}
+
+const tailVals = DATA.map(d => d.tail);
+const tailErr = DATA.map(d => d.tail_std);
+const rbVals = DATA.map(d => d.rb_var);
+const rbErr = DATA.map(() => 0);
+const alignVals = DATA.map(d => d.align);
+const alignErr = DATA.map(d => d.align_std);
+const effVals = DATA.map(d => d.eff);
+const effErr = DATA.map(d => d.eff_std);
+
+setTimeout(() => {
+  drawChart('c1', tailVals, tailErr, '#ff6b6b', 'rgba(255,107,107,0.1)');
+  drawChart('c2', rbVals, rbErr, '#ffd93d', 'rgba(255,217,61,0.1)');
+  drawChart('c3', alignVals, alignErr, '#4ecdc4', 'rgba(78,205,196,0.1)');
+  drawChart('c4', effVals, effErr, '#a78bfa', 'rgba(167,139,250,0.1)');
+
+  const stdVals = DATA.map(d => d.tail_std);
+  const convergenceDetected = stdVals[stdVals.length - 1] < stdVals[0] * 0.75;
+  const alignNarrowing = DATA[DATA.length - 1].align_std < DATA[0].align_std * 0.3;
+
+  const el = document.getElementById('verdict');
+  if (convergenceDetected && alignNarrowing) {
+    el.textContent = 'VARIANCE COLLAPSE: STRUCTURE EMERGES';
+    el.className = 'verdict convergence';
+  } else if (convergenceDetected) {
+    el.textContent = 'CONVERGENCE DETECTED';
+    el.className = 'verdict convergence';
+  }
+}, 200);
+
+</script>
+</body>
+</html>
